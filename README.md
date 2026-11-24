@@ -24,6 +24,9 @@ represents when the complete row was actually available, not when it was dated.
 The research command writes generated strategy code, a SHA-256 data fingerprint,
 `experiments.jsonl`, and `summary.json`. The test command opens the holdout once
 for the selected candidate and writes `holdout.json`.
+Runs sharing a parent directory also share a local audit marker, so identical
+data and test dates cannot be reopened from a sibling run directory. Keep all
+run folders under one `runs/` directory to retain this guard.
 By default, research uses three expanding validation folds of 60 market
 sessions each, separated from training by five market sessions. The selected
 candidate maximizes median fold validation return. For a very small fixture,

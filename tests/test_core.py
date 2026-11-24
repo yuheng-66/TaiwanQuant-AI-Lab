@@ -121,6 +121,28 @@ class EvaluatorTests(unittest.TestCase):
             self.assertEqual(record["status"], "completed")
             self.assertFalse((out / "holdout.json").exists())
 
+    def test_same_holdout_is_blocked_across_sibling_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bars.csv"
+            with path.open("w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["date", "symbol", "open", "close", "volume", "available_at"])
+                for i in range(20):
+                    day = date(2024, 1, 1) + timedelta(days=i)
+                    writer.writerow([day, "2330", 10 + i, 10 + i, 2_000_000,
+                                     f"{day}T17:00:00+08:00"])
+            runs = Path(tmp) / "runs"
+            for name in ("first", "second"):
+                research(SimpleNamespace(
+                    csv=str(path), out=str(runs / name), train_end="2024-01-08",
+                    valid_end="2024-01-14", test_end="2024-01-20",
+                    max_trials=1, max_seconds=120,
+                ))
+            test_holdout(SimpleNamespace(csv=str(path), run=str(runs / "first")))
+            with self.assertRaisesRegex(ValueError, "already opened"):
+                test_holdout(SimpleNamespace(csv=str(path), run=str(runs / "second")))
+            self.assertFalse((runs / "second" / "holdout.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

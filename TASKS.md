@@ -13,6 +13,8 @@
 - [x] Preserve market-date order when delayed rows become available to a signal.
 - [x] Add expanding, disjoint walk-forward validation folds with a session embargo.
 - [x] Bound input size, row count, trial count and experiment wall time.
+- [x] Prevent reopening the same data fingerprint and holdout dates across
+  sibling research runs with a persistent local audit marker.
 
 ## Next
 
@@ -22,7 +24,7 @@
 - [ ] Add split/dividend/delisting adjustments and orderability checks for
   limit-up/down and suspensions.
 - [ ] Add benchmark, risk-adjusted predeclared metric and uncertainty estimates;
-  prohibit repeated final-period selection across distinct research runs.
+  disclose any final-period selection across different datasets or run groups.
 - [ ] Implement a constrained optional local-model proposer and isolated
   execution process with CPU, memory and wall-time limits.
 - [ ] Publish a reproducible research note with every run and negative result.

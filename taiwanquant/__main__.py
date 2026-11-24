@@ -10,7 +10,7 @@ import statistics
 import sys
 import time
 from dataclasses import asdict
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .core import Costs, evaluate, load_bars
@@ -156,6 +156,22 @@ def test_holdout(args: argparse.Namespace) -> None:
     if hashlib.sha256(source.encode()).hexdigest() != selected["source_sha256"]:
         raise ValueError("selected candidate was modified")
     lookback, top_n = candidate_parameters(source)
+    audit_key = hashlib.sha256(
+        f"{fingerprint}|{config['test_start']}|{config['test_end']}".encode()
+    ).hexdigest()
+    audit_root = out.parent / ".holdout-audit"
+    audit_root.mkdir(exist_ok=True)
+    audit_path = audit_root / audit_key
+    try:
+        audit_path.mkdir()
+    except FileExistsError as exc:
+        raise ValueError("same data and holdout window were already opened in this run group") from exc
+    write_json(audit_path / "opened.json", {
+        "data_sha256": fingerprint,
+        "test_start": config["test_start"], "test_end": config["test_end"],
+        "run": str(out.resolve()), "trial": selected["trial"],
+        "opened_at_utc": datetime.now(timezone.utc).isoformat(),
+    })
     (out / ".holdout-opened").write_text("opened\n")
     try:
         result = evaluate(

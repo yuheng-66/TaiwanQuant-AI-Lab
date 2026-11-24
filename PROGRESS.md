@@ -29,5 +29,9 @@ default candidate selection now uses the median validation return across
 three disjoint folds. No real market backtest was run.
 Added input, row, trial and experiment wall-time limits; evaluation checks the
 deadline during processing. The local synthetic and schema test suite now has
-15 passing tests. No real market backtest was run.
+16 passing tests. No real market backtest was run.
 The evaluator also rejects negative or non-finite transaction costs.
+
+Added a shared local holdout audit marker for runs under one parent directory.
+The same data hash and test dates cannot be reopened from a sibling run. The
+guard is deliberately described as an audit aid, not tamper-proof security.

@@ -36,8 +36,10 @@ validation return chooses a candidate; the fold boundaries and scores are
 recorded. It never computes test-period metrics. `test` checks data and candidate hashes,
 marks the holdout as opened before evaluation, and writes the result or failure.
 Once opened, that run cannot be retested through the CLI. This is an audit aid,
-not tamper-proof security. A fresh run still allows repeated testing; research
-reports must disclose all such runs.
+not tamper-proof security. A persistent marker in the parent run directory
+also blocks the same data fingerprint and test dates across sibling runs.
+Copying the data or moving runs to a new parent can bypass it; research reports
+must disclose all such runs.
 
 The current scorer selects by median fold validation total return. It is
 intentionally simple and should be replaced by a predeclared, risk-adjusted
