@@ -148,7 +148,8 @@ def evaluate(
         pending = [s for _, s in sorted(ranked, key=lambda item: (-item[0], item[1]))[:top_n]]
     if len(equity) < 2:
         raise ValueError("evaluation window needs at least two market dates")
-    returns = [equity[i] / equity[i - 1] - 1 for i in range(1, len(equity))]
+    returns = [equity[0] / initial_cash - 1]
+    returns.extend(equity[i] / equity[i - 1] - 1 for i in range(1, len(equity)))
     mean = sum(returns) / len(returns)
     variance = sum((r - mean) ** 2 for r in returns) / len(returns)
     sharpe = mean / math.sqrt(variance) * math.sqrt(252) if variance > 0 else None
@@ -159,7 +160,7 @@ def evaluate(
         max_drawdown = min(max_drawdown, value / peak - 1)
     return {
         "sessions": len(equity), "trades": trades,
-        "total_return": equity[-1] / equity[0] - 1,
+        "total_return": equity[-1] / initial_cash - 1,
         "sharpe": sharpe, "max_drawdown": max_drawdown,
         "total_cost_twd": round(total_cost, 2),
         "final_equity_twd": round(equity[-1], 2),
