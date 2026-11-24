@@ -54,3 +54,12 @@ request has been made. The suite now has 22 passing tests.
 The experiment runner now logs and rejects any candidate with zero trades in
 a training or validation fold.
 The suite now has 23 passing tests.
+
+Inspected the user's `Desktop/fubon-market-monitor` on their Mac. It already
+has a Keychain-backed SDK login path, an intraday SQLite recorder, and a
+read-only historical minute-candle script. Fourteen private 6770 archive
+files span 2026-03-23 to 2026-09-22. The last file contains 532 minute bars
+for 2026-09-21 to 2026-09-22 and has SHA-256
+`50c754b9d2b019e894a55c015988823ad6a9f65ef4f7f1fafc94780ded56bca0`.
+This was metadata-only inspection; no credentials, live broker requests,
+orders, or market-performance experiments were involved. See `FUBON_NEO.md`.

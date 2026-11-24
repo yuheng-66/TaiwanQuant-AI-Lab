@@ -20,15 +20,17 @@
 - [x] Add a read-only Fubon historical-candle adapter for an already
   authenticated stock client; test request limits and private manifests.
 - [x] Reject no-trade candidates while preserving their failure records.
+- [x] Inspect the user's existing Mac Fubon monitor and cached minute-bar
+  format without reading credentials or making broker requests.
 
 ## Next
 
 - [ ] Obtain a survivorship-aware historical TWSE/TPEX dataset and verify its
   specific license, publication lag, adjustment method and delisting coverage.
   Keep raw rows outside Git. The licensed daily feeds alone are insufficient.
-- [ ] Connect the user's existing Fubon Neo setup for read-only historical
-  candles after confirming account-specific charges and credential location.
-  Keep all broker-derived data local and out of public commits.
+- [ ] Confirm account-specific Fubon market-data charges, then use the Mac's
+  existing Keychain login for a bounded read-only daily-candle retrieval.
+  Validate the response and keep broker data out of public commits.
 - [ ] Add split/dividend/delisting adjustments and orderability checks for
   limit-up/down and suspensions.
 - [ ] Add benchmark, risk-adjusted predeclared metric and uncertainty estimates;

@@ -52,3 +52,26 @@ stock client, requests unadjusted daily candles for fewer than 365 days,
 validates the response, and saves quote bytes plus a provenance manifest in
 `data/fubon/raw/`. It contains no login, order, or account-query code. It is
 not invoked by the normal CLI or daily research automation.
+
+## Existing Mac implementation inspected 2026-11-25
+
+The user's `Desktop/fubon-market-monitor` project already authenticates with
+Keychain and a local certificate. Its `MarketRuntime` uses
+`sdk.apikey_login`, reads REST intraday quotes and WebSocket trades/books, and
+stores records in local SQLite. The separate
+`scripts/fetch_6770_research.py` uses the SDK's historical-candle endpoint to
+cache 6770 one-minute bars in 14 local files spanning 2026-03-23 through
+2026-09-22. A metadata-only inspection of the final file found 532 bars with
+timezone-aware timestamps, `timeframe="1"`, `exchange="TWSE"`, and OHLC,
+volume, and average fields; its SHA-256 is
+`50c754b9d2b019e894a55c015988823ad6a9f65ef4f7f1fafc94780ded56bca0`.
+No broker request or credential read was needed for this inspection.
+
+Those minute files are private, cover one symbol, and do not declare an
+adjustment policy or original publication times. They are useful as an
+integration fixture, but cannot establish a survivor-free daily stock
+backtest. Keep the existing Mac Keychain and certificate in place. A future
+daily-bar retrieval can reuse the authenticated client in memory and pass it
+to `fetch_daily_candles`; first confirm account-specific market-data fees and
+that the saved response matches this project's daily schema. Do not commit
+the Mac archive or its contents.
