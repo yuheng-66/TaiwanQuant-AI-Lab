@@ -29,9 +29,14 @@ default candidate selection now uses the median validation return across
 three disjoint folds. No real market backtest was run.
 Added input, row, trial and experiment wall-time limits; evaluation checks the
 deadline during processing. The local synthetic and schema test suite now has
-16 passing tests. No real market backtest was run.
+17 passing tests. No real market backtest was run.
 The evaluator also rejects negative or non-finite transaction costs.
 
 Added a shared local holdout audit marker for runs under one parent directory.
 The same data hash and test dates cannot be reopened from a sibling run. The
 guard is deliberately described as an audit aid, not tamper-proof security.
+
+Corrected the TPEx catalogue reference from dataset 11370 to 11371 after
+cross-checking the endpoint fields against the official closing-quotes entry.
+The local manifest retains the previous reference and the correction note;
+the captured bytes and SHA-256 are unchanged.

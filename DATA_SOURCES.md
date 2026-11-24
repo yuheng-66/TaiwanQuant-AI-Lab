@@ -1,8 +1,8 @@
 # Taiwan quote data provenance (reviewed 2026-11-25)
 
 The government open data catalogue lists [TWSE listed daily security
-transactions](https://data.gov.tw/dataset/11549) and [TPEx OTC daily
-quotes](https://data.gov.tw/dataset/11370) as free datasets under the
+transactions](https://data.gov.tw/dataset/11549) and [TPEx OTC closing
+quotes](https://data.gov.tw/dataset/11371) as free datasets under the
 [Open Government Data License v1](https://data.gov.tw/license). The license
 permits reuse with explicit attribution. The source pages name the Securities
 and Futures Bureau as the provider and link the exchanges' OpenAPI documents.
@@ -14,7 +14,7 @@ assume all exchange data can be redistributed.
 | Market | Endpoint captured | Catalogue page | Fields used for sanity checks |
 |---|---|---|---|
 | TWSE listed | `https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL` | [11549](https://data.gov.tw/dataset/11549) | `Date`, `Code`, `OpeningPrice`, `ClosingPrice`, `TradeVolume` |
-| TPEx OTC | `https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes` | [11370](https://data.gov.tw/dataset/11370) | `Date`, `SecuritiesCompanyCode`, `Open`, `Close`, `TradingShares` |
+| TPEx OTC | `https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes` | [11371](https://data.gov.tw/dataset/11371) | `Date`, `SecuritiesCompanyCode`, `Open`, `Close`, `TradingShares` |
 
 The endpoints contain ETFs and other instruments as well as stocks. Asset
 classification is required before a listed-stock tax model or equity-only
@@ -34,6 +34,11 @@ the retrieval time, observed market dates, byte hash, row count, source URL,
 and license page. Check the manifest and source catalogue license before any
 reuse. Do not publish captured snapshots until attribution and instrument
 coverage have been reviewed.
+
+Metadata correction on 2026-11-25: the first TPEx manifest incorrectly
+pointed to dataset 11370. The captured `tpex_mainboard_quotes` fields match
+the closing-quotes dataset 11371. The local manifest records both the original
+reference and this correction; its raw-byte hash is unchanged.
 
 **Remaining data gate:** a historical, survivor-free universe, corporate
 action adjustments, publication timestamps and delisting outcomes are still

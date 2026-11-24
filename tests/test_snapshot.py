@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from taiwanquant.snapshot import capture, roc_date, validate_payload
+from taiwanquant.snapshot import SOURCES, capture, roc_date, validate_payload
 
 
 class FakeResponse:
@@ -23,6 +23,9 @@ class FakeResponse:
 
 
 class SnapshotTests(unittest.TestCase):
+    def test_tpex_catalogue_mapping(self):
+        self.assertEqual(SOURCES["tpex"]["dataset"], "https://data.gov.tw/dataset/11371")
+
     def test_roc_date(self):
         self.assertEqual(str(roc_date("1151124")), "2026-11-24")
         with self.assertRaises(ValueError):

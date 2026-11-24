@@ -41,7 +41,7 @@ papers were inspected. Upstream code was not copied into this project.
    restrict reuse except material authorized as government open data. Keep raw
    datasets out of Git; verify a dataset's specific license before publishing.
    The [TWSE daily dataset](https://data.gov.tw/dataset/11549) and
-   [TPEx daily dataset](https://data.gov.tw/dataset/11370) are explicitly listed
+   [TPEx closing-quotes dataset](https://data.gov.tw/dataset/11371) are explicitly listed
    as free under the [Open Government Data License v1](https://data.gov.tw/license),
    which requires attribution. This does not establish rights or historical
    point-in-time coverage for other exchange datasets.

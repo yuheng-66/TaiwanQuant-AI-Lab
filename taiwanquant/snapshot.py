@@ -18,7 +18,7 @@ SOURCES = {
     },
     "tpex": {
         "url": "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes",
-        "dataset": "https://data.gov.tw/dataset/11370",
+        "dataset": "https://data.gov.tw/dataset/11371",
         "date_field": "Date",
         "required": {"Date", "SecuritiesCompanyCode", "Open", "Close", "TradingShares"},
     },
