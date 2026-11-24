@@ -30,13 +30,17 @@ def validate_candles(payload: dict, expected_symbol: str) -> dict:
         try:
             day = date.fromisoformat(row["date"])
             opening = float(row["open"])
+            high = float(row["high"])
+            low = float(row["low"])
             closing = float(row["close"])
             volume = float(row["volume"])
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"invalid candle {index}: {exc}") from exc
-        if day in dates or not all(map(math.isfinite, (opening, closing, volume))):
+        if day in dates or not all(map(math.isfinite, (opening, high, low, closing, volume))):
             raise ValueError(f"duplicate date or non-finite candle {index}")
-        if opening <= 0 or closing <= 0 or volume < 0 or not volume.is_integer():
+        if (low <= 0 or low > min(opening, closing) or
+                high < max(opening, closing) or volume < 0 or
+                not volume.is_integer()):
             raise ValueError(f"invalid price or share volume in candle {index}")
         dates.add(day)
     return {

@@ -63,3 +63,10 @@ for 2026-09-21 to 2026-09-22 and has SHA-256
 `50c754b9d2b019e894a55c015988823ad6a9f65ef4f7f1fafc94780ded56bca0`.
 This was metadata-only inspection; no credentials, live broker requests,
 orders, or market-performance experiments were involved. See `FUBON_NEO.md`.
+
+The Fubon daily-candle validator now requires finite high and low values and
+rejects OHLC ranges that exclude the opening or closing price. One targeted
+synthetic test covers an inconsistent high. The offline suite has 24 passing
+tests. No broker request or market-performance experiment was run. A new live
+request remains blocked because the user's Mac connection does not grant
+terminal execution; do not bypass that access boundary.

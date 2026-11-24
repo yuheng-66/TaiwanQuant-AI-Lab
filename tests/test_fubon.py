@@ -12,7 +12,8 @@ class FubonInspectorTests(unittest.TestCase):
         payload = {
             "symbol": "2330", "type": "EQUITY", "exchange": "TWSE",
             "market": "TSE", "timeframe": "D", "adjusted": False,
-            "data": [{"date": "2024-01-02", "open": 10, "close": 11,
+            "data": [{"date": "2024-01-02", "open": 10, "high": 12,
+                      "low": 9, "close": 11,
                       "volume": 1000}],
         }
         payload.update(changes)
@@ -38,9 +39,19 @@ class FubonInspectorTests(unittest.TestCase):
     def test_rejects_invalid_volume(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make_file(tmp, data=[{"date": "2024-01-02",
-                                              "open": 10, "close": 11,
+                                              "open": 10, "high": 12, "low": 9,
+                                              "close": 11,
                                               "volume": 1.5}])
             with self.assertRaisesRegex(ValueError, "share volume"):
+                inspect_candles(path, "2330")
+
+    def test_rejects_inconsistent_ohlc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make_file(tmp, data=[{"date": "2024-01-02",
+                                              "open": 10, "high": 10.5,
+                                              "low": 9, "close": 11,
+                                              "volume": 1000}])
+            with self.assertRaisesRegex(ValueError, "invalid price"):
                 inspect_candles(path, "2330")
 
     def test_read_only_fetch_saves_private_provenance(self):
@@ -49,7 +60,8 @@ class FubonInspectorTests(unittest.TestCase):
                 self.request = kwargs
                 return {
                     "symbol": "2330", "exchange": "TWSE", "timeframe": "D",
-                    "data": [{"date": "2024-01-02", "open": 10, "close": 11,
+                    "data": [{"date": "2024-01-02", "open": 10,
+                              "high": 12, "low": 9, "close": 11,
                               "volume": 1000}],
                 }
 

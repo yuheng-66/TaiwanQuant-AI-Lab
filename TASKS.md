@@ -22,6 +22,8 @@
 - [x] Reject no-trade candidates while preserving their failure records.
 - [x] Inspect the user's existing Mac Fubon monitor and cached minute-bar
   format without reading credentials or making broker requests.
+- [x] Validate Fubon daily OHLC range consistency before accepting private
+  broker exports or responses.
 
 ## Next
 
