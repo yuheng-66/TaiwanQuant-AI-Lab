@@ -15,12 +15,17 @@
 - [x] Bound input size, row count, trial count and experiment wall time.
 - [x] Prevent reopening the same data fingerprint and holdout dates across
   sibling research runs with a persistent local audit marker.
+- [x] Review official Fubon Neo daily-candle, corporate-action, rate-limit and
+  data-use documents; add an offline private-export inspector.
 
 ## Next
 
 - [ ] Obtain a survivorship-aware historical TWSE/TPEX dataset and verify its
   specific license, publication lag, adjustment method and delisting coverage.
   Keep raw rows outside Git. The licensed daily feeds alone are insufficient.
+- [ ] Connect the user's existing Fubon Neo setup for read-only historical
+  candles after confirming account-specific charges and credential location.
+  Keep all broker-derived data local and out of public commits.
 - [ ] Add split/dividend/delisting adjustments and orderability checks for
   limit-up/down and suspensions.
 - [ ] Add benchmark, risk-adjusted predeclared metric and uncertainty estimates;

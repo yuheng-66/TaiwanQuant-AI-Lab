@@ -40,3 +40,10 @@ Corrected the TPEx catalogue reference from dataset 11370 to 11371 after
 cross-checking the endpoint fields against the official closing-quotes entry.
 The local manifest retains the previous reference and the correction note;
 the captured bytes and SHA-256 are unchanged.
+
+Reviewed Fubon Neo's official historical-candle and corporate-action APIs.
+Its daily stock series reaches 2010, but current downloads do not preserve
+the original publication timestamp or a survivor-free universe. Added an
+offline inspector for private daily-candle exports. No login, broker request,
+or order was made.
+The offline suite has 20 passing tests after this adapter was added.

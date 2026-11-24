@@ -14,6 +14,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .core import Costs, evaluate, load_bars
+from .fubon import inspect_candles
 from .snapshot import capture
 from .validation import Fold, expanding_folds
 
@@ -214,6 +215,9 @@ def main() -> None:
     snapshot = sub.add_parser("snapshot", help="capture an observed public daily quote response")
     snapshot.add_argument("market", choices=("twse", "tpex"))
     snapshot.add_argument("--out", default="data/raw")
+    fubon = sub.add_parser("fubon-inspect", help="inspect a private Fubon daily-candle export")
+    fubon.add_argument("json_file")
+    fubon.add_argument("--symbol", required=True)
     args = parser.parse_args()
     try:
         if args.command == "validate":
@@ -227,6 +231,8 @@ def main() -> None:
             research(args)
         elif args.command == "test":
             test_holdout(args)
+        elif args.command == "fubon-inspect":
+            print(json.dumps(inspect_candles(args.json_file, args.symbol)))
         else:
             raw, manifest = capture(args.market, Path(args.out))
             print(json.dumps({"raw": str(raw.resolve()), "manifest": str(manifest.resolve())}))
