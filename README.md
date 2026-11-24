@@ -32,6 +32,8 @@ By default, research uses three expanding validation folds of 60 market
 sessions each, separated from training by five market sessions. The selected
 candidate maximizes median fold validation return. For a very small fixture,
 pass `--walk-forward-folds 1` to use a single train/validation split.
+Candidates with no executable trades in any train or validation fold are
+logged as failed and cannot be selected.
 The input cap is 100 MB or 250,000 rows, the trial cap is 15, and the
 experiment loop checks a monotonic wall-time deadline (120 seconds by default)
 throughout evaluation. `--max-seconds` may be set from 1 to 3,600.

@@ -109,6 +109,8 @@ def research(args: argparse.Namespace) -> None:
                                  lookback, top_n, costs, deadline=deadline)
                 valid = evaluate(bars, fold.valid_start, fold.valid_end,
                                  lookback, top_n, costs, deadline=deadline)
+                if train["trades"] == 0 or valid["trades"] == 0:
+                    raise ValueError("candidate has no executable trades in a fold")
                 fold_results.append({"window": fold.as_dict(), "train": train,
                                      "validation": valid})
             score = statistics.median(fold["validation"]["total_return"]

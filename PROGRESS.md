@@ -51,3 +51,6 @@ Added a read-only historical-candle fetch function requiring an already
 authenticated Fubon stock client. It requests unadjusted daily bars for less
 than 365 days and stores data only in Git-ignored local paths. No broker
 request has been made. The suite now has 22 passing tests.
+The experiment runner now logs and rejects any candidate with zero trades in
+a training or validation fold.
+The suite now has 23 passing tests.

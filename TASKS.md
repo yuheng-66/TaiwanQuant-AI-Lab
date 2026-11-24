@@ -19,6 +19,7 @@
   data-use documents; add an offline private-export inspector.
 - [x] Add a read-only Fubon historical-candle adapter for an already
   authenticated stock client; test request limits and private manifests.
+- [x] Reject no-trade candidates while preserving their failure records.
 
 ## Next
 

@@ -82,13 +82,13 @@ class EvaluatorTests(unittest.TestCase):
             with path.open("w", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(["date", "symbol", "open", "close", "volume", "available_at"])
-                for i in range(12):
+                for i in range(30):
                     day = date(2024, 1, 1) + timedelta(days=i)
                     writer.writerow([day, "2330", 10 + i, 10 + i, 2_000_000,
                                      f"{day}T17:00:00+08:00"])
             out = Path(tmp) / "run"
-            research(SimpleNamespace(csv=str(path), out=str(out), train_end="2024-01-04",
-                                     valid_end="2024-01-08", test_end="2024-01-12",
+            research(SimpleNamespace(csv=str(path), out=str(out), train_end="2024-01-15",
+                                     valid_end="2024-01-23", test_end="2024-01-30",
                                      max_trials=2, max_seconds=120))
             records = [json.loads(line) for line in (out / "experiments.jsonl").read_text().splitlines()]
             self.assertEqual(len(records), 2)
@@ -98,6 +98,27 @@ class EvaluatorTests(unittest.TestCase):
             self.assertTrue((out / "holdout.json").exists())
             with self.assertRaisesRegex(ValueError, "already been opened"):
                 test_holdout(SimpleNamespace(csv=str(path), run=str(out)))
+
+    def test_no_trade_candidate_is_logged_and_not_selected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bars.csv"
+            with path.open("w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["date", "symbol", "open", "close", "volume", "available_at"])
+                for i in range(12):
+                    day = date(2024, 1, 1) + timedelta(days=i)
+                    writer.writerow([day, "2330", 10, 10, 2_000_000,
+                                     f"{day}T17:00:00+08:00"])
+            out = Path(tmp) / "run"
+            research(SimpleNamespace(
+                csv=str(path), out=str(out), train_end="2024-01-04",
+                valid_end="2024-01-08", test_end="2024-01-12",
+                max_trials=1, max_seconds=120,
+            ))
+            record = json.loads((out / "experiments.jsonl").read_text().splitlines()[0])
+            self.assertEqual(record["status"], "failed")
+            self.assertIn("no executable trades", record["error"])
+            self.assertIsNone(json.loads((out / "summary.json").read_text())["selected_trial"])
 
     def test_research_records_multiple_validation_folds(self):
         with tempfile.TemporaryDirectory() as tmp:
