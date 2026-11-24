@@ -30,15 +30,22 @@ sends orders to a broker.
 Late-arriving rows enter the feature history only after their recorded
 availability time; history remains ordered by market date.
 
-`research` consumes a chronological train window and a validation window. It
-never computes test-period metrics. `test` checks data and candidate hashes,
+`research` consumes chronological expanding train windows and disjoint
+validation windows, with a five-session default embargo. The median fold
+validation return chooses a candidate; the fold boundaries and scores are
+recorded. It never computes test-period metrics. `test` checks data and candidate hashes,
 marks the holdout as opened before evaluation, and writes the result or failure.
 Once opened, that run cannot be retested through the CLI. This is an audit aid,
 not tamper-proof security. A fresh run still allows repeated testing; research
 reports must disclose all such runs.
 
-The current scorer selects by validation total return. It is intentionally
-simple and should be replaced by a predeclared, risk-adjusted objective and
-walk-forward evaluation before publication. The current backtest ignores
+The current scorer selects by median fold validation total return. It is
+intentionally simple and should be replaced by a predeclared, risk-adjusted
+objective with uncertainty estimates before publication. The current backtest ignores
 corporate actions, dividends, limit queues and settlement constraints. It
 must not be interpreted as executable strategy P&L.
+
+The current input guard rejects files over 100 MB or 250,000 rows. Candidate
+search is limited to 15 trials, with a monotonic deadline checked during each
+evaluation. These are CPU and input bounds; process-level memory isolation is
+still a planned improvement before accepting generated arbitrary strategy code.

@@ -6,6 +6,7 @@ import argparse
 import ast
 import hashlib
 import json
+import statistics
 import sys
 import time
 from dataclasses import asdict
@@ -14,6 +15,7 @@ from pathlib import Path
 
 from .core import Costs, evaluate, load_bars
 from .snapshot import capture
+from .validation import Fold, expanding_folds
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -63,6 +65,14 @@ def research(args: argparse.Namespace) -> None:
     costs = Costs()
     out.mkdir(parents=True)
     (out / "candidates").mkdir()
+    fold_count = getattr(args, "walk_forward_folds", 1)
+    if fold_count == 1:
+        folds = [Fold(train_start, train_end, valid_start, valid_end)]
+    else:
+        folds = expanding_folds(
+            [b.day for b in bars], train_end, valid_end, fold_count,
+            getattr(args, "fold_sessions", 60), getattr(args, "embargo_sessions", 5),
+        )
     config = {
         "data_sha256": fingerprint, "source": str(Path(args.csv).resolve()),
         "train_start": train_start.isoformat(), "train_end": args.train_end,
@@ -70,13 +80,16 @@ def research(args: argparse.Namespace) -> None:
         "test_start": test_start.isoformat(), "test_end": args.test_end,
         "costs": asdict(costs), "max_trials": args.max_trials,
         "max_seconds": args.max_seconds, "engine": "deterministic-template-v1",
+        "folds": [fold.as_dict() for fold in folds],
+        "selection_metric": "median_fold_validation_total_return",
     }
     write_json(out / "config.json", config)
     started = time.monotonic()
+    deadline = started + args.max_seconds
     best = None
     proposals = [(l, n) for l in (5, 10, 20, 40, 60) for n in (1, 2, 3)]
     for index, (lookback, top_n) in enumerate(proposals[:args.max_trials], 1):
-        if time.monotonic() - started >= args.max_seconds:
+        if time.monotonic() >= deadline:
             break
         source = candidate_source(lookback, top_n)
         candidate = out / "candidates" / f"trial_{index:03d}.py"
@@ -89,21 +102,32 @@ def research(args: argparse.Namespace) -> None:
         }
         try:
             lookback, top_n = candidate_parameters(candidate.read_text())
-            train = evaluate(bars, train_start, train_end, lookback, top_n, costs)
-            valid = evaluate(bars, valid_start, valid_end, lookback, top_n, costs)
-            record.update(status="completed", train=train, validation=valid)
-            score = valid["total_return"]
-            if best is None or score > best["validation"]["total_return"]:
+            fold_results = []
+            for fold in folds:
+                train = evaluate(bars, fold.train_start, fold.train_end,
+                                 lookback, top_n, costs, deadline=deadline)
+                valid = evaluate(bars, fold.valid_start, fold.valid_end,
+                                 lookback, top_n, costs, deadline=deadline)
+                fold_results.append({"window": fold.as_dict(), "train": train,
+                                     "validation": valid})
+            score = statistics.median(fold["validation"]["total_return"]
+                                      for fold in fold_results)
+            record.update(status="completed", train=fold_results[-1]["train"],
+                          validation=fold_results[-1]["validation"],
+                          folds=fold_results, selection_score=score)
+            if best is None or score > best["selection_score"]:
                 best = record
         except Exception as exc:
             record["error"] = f"{type(exc).__name__}: {exc}"
         append_jsonl(out / "experiments.jsonl", record)
+        if record.get("error", "").startswith("TimeoutError:"):
+            break
     log_path = out / "experiments.jsonl"
     count = len(log_path.read_text().splitlines()) if log_path.exists() else 0
     write_json(out / "summary.json", {
         "trials_recorded": count,
         "selected_trial": best["trial"] if best else None,
-        "selection_metric": "validation_total_return",
+        "selection_metric": "median_fold_validation_total_return",
         "holdout_opened": False,
     })
     print(out.resolve())
@@ -165,6 +189,9 @@ def main() -> None:
     run.add_argument("--out", required=True)
     run.add_argument("--max-trials", type=int, default=12)
     run.add_argument("--max-seconds", type=int, default=120)
+    run.add_argument("--walk-forward-folds", type=int, default=3)
+    run.add_argument("--fold-sessions", type=int, default=60)
+    run.add_argument("--embargo-sessions", type=int, default=5)
     holdout = sub.add_parser("test")
     holdout.add_argument("csv")
     holdout.add_argument("--run", required=True)
@@ -179,6 +206,8 @@ def main() -> None:
         elif args.command == "research":
             if not 1 <= args.max_trials <= 15 or not 1 <= args.max_seconds <= 3600:
                 raise ValueError("max-trials must be 1..15 and max-seconds 1..3600")
+            if not 1 <= args.walk_forward_folds <= 8:
+                raise ValueError("walk-forward-folds must be 1..8")
             research(args)
         elif args.command == "test":
             test_holdout(args)

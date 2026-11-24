@@ -29,6 +29,18 @@ class EvaluatorTests(unittest.TestCase):
         self.assertLess(with_cost["total_return"], 0)
         self.assertGreater(with_cost["total_cost_twd"], 0)
 
+    def test_expired_budget_stops_evaluation(self):
+        rows = [bar("2024-01-01", 10), bar("2024-01-02", 20)]
+        with self.assertRaisesRegex(TimeoutError, "budget exhausted"):
+            evaluate(rows, date(2024, 1, 1), date(2024, 1, 2), 2, 1,
+                     deadline=0.0)
+
+    def test_negative_transaction_cost_is_rejected(self):
+        rows = [bar("2024-01-01", 10), bar("2024-01-02", 20)]
+        with self.assertRaisesRegex(ValueError, "transaction cost"):
+            evaluate(rows, date(2024, 1, 1), date(2024, 1, 2), 2, 1,
+                     Costs(commission=-0.01))
+
     def test_unpublished_bar_cannot_drive_signal(self):
         rows = [bar("2024-01-01", 10),
                 Bar(date(2024, 1, 2), "2330", 20, 20, 2_000_000,
@@ -86,6 +98,28 @@ class EvaluatorTests(unittest.TestCase):
             self.assertTrue((out / "holdout.json").exists())
             with self.assertRaisesRegex(ValueError, "already been opened"):
                 test_holdout(SimpleNamespace(csv=str(path), run=str(out)))
+
+    def test_research_records_multiple_validation_folds(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bars.csv"
+            with path.open("w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["date", "symbol", "open", "close", "volume", "available_at"])
+                for i in range(100):
+                    day = date(2024, 1, 1) + timedelta(days=i)
+                    writer.writerow([day, "2330", 10 + i / 10, 10 + i / 10,
+                                     2_000_000, f"{day}T17:00:00+08:00"])
+            out = Path(tmp) / "run"
+            research(SimpleNamespace(
+                csv=str(path), out=str(out), train_end="2024-01-31",
+                valid_end="2024-03-11", test_end="2024-04-09",
+                max_trials=2, max_seconds=120, walk_forward_folds=2,
+                fold_sessions=10, embargo_sessions=2,
+            ))
+            record = json.loads((out / "experiments.jsonl").read_text().splitlines()[0])
+            self.assertEqual(len(record["folds"]), 2)
+            self.assertEqual(record["status"], "completed")
+            self.assertFalse((out / "holdout.json").exists())
 
 
 if __name__ == "__main__":

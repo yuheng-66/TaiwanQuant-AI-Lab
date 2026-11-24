@@ -24,6 +24,13 @@ represents when the complete row was actually available, not when it was dated.
 The research command writes generated strategy code, a SHA-256 data fingerprint,
 `experiments.jsonl`, and `summary.json`. The test command opens the holdout once
 for the selected candidate and writes `holdout.json`.
+By default, research uses three expanding validation folds of 60 market
+sessions each, separated from training by five market sessions. The selected
+candidate maximizes median fold validation return. For a very small fixture,
+pass `--walk-forward-folds 1` to use a single train/validation split.
+The input cap is 100 MB or 250,000 rows, the trial cap is 15, and the
+experiment loop checks a monotonic wall-time deadline (120 seconds by default)
+throughout evaluation. `--max-seconds` may be set from 1 to 3,600.
 The snapshot command records an official daily response, retrieval timestamp,
 source license page and SHA-256 hash under the Git-ignored `data/raw/` folder.
 It is an observation, not a point-in-time historical dataset: the API does not

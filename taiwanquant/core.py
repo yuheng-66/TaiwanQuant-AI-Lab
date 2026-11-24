@@ -5,12 +5,15 @@ from __future__ import annotations
 import csv
 import hashlib
 import math
+import time as clock
 from bisect import insort
 from dataclasses import dataclass
 from datetime import date, datetime, time, timezone, timedelta
 from pathlib import Path
 
 TPE = timezone(timedelta(hours=8))
+MAX_INPUT_BYTES = 100_000_000
+MAX_BARS = 250_000
 
 
 @dataclass(frozen=True)
@@ -34,6 +37,8 @@ class Costs:
 
 def load_bars(path: str | Path) -> tuple[list[Bar], str]:
     path = Path(path)
+    if path.stat().st_size > MAX_INPUT_BYTES:
+        raise ValueError("dataset exceeds 100 MB input limit")
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     bars: list[Bar] = []
     seen: set[tuple[date, str]] = set()
@@ -43,6 +48,8 @@ def load_bars(path: str | Path) -> tuple[list[Bar], str]:
         if not required.issubset(reader.fieldnames or []):
             raise ValueError(f"missing columns: {sorted(required - set(reader.fieldnames or []))}")
         for line, row in enumerate(reader, 2):
+            if len(bars) >= MAX_BARS:
+                raise ValueError(f"dataset exceeds {MAX_BARS} row limit")
             try:
                 day = date.fromisoformat(row["date"])
                 symbol = row["symbol"].strip()
@@ -69,6 +76,7 @@ def load_bars(path: str | Path) -> tuple[list[Bar], str]:
 def evaluate(
     bars: list[Bar], start: date, end: date, lookback: int, top_n: int,
     costs: Costs = Costs(), initial_cash: float = 10_000_000,
+    deadline: float | None = None,
 ) -> dict:
     """Rank close-to-close momentum at 18:00 TPE; fill at next session open.
 
@@ -79,8 +87,14 @@ def evaluate(
         raise ValueError("invalid strategy or window")
     if initial_cash <= 0 or not 0 <= costs.max_volume_fraction <= 1:
         raise ValueError("invalid capital or participation cap")
+    if (costs.lot_size < 1 or any(not math.isfinite(value) or not 0 <= value < 0.1
+                                for value in (costs.commission, costs.sell_tax,
+                                              costs.slippage))):
+        raise ValueError("invalid transaction cost or lot size")
     by_day: dict[date, dict[str, Bar]] = {}
-    for b in bars:
+    for index, b in enumerate(bars):
+        if deadline is not None and index % 1024 == 0 and clock.monotonic() >= deadline:
+            raise TimeoutError("experiment wall-time budget exhausted")
         by_day.setdefault(b.day, {})[b.symbol] = b
     days = sorted(by_day)
     history: dict[str, list[tuple[date, float]]] = {}
@@ -94,6 +108,8 @@ def evaluate(
     trades = 0
     total_cost = 0.0
     for day in days:
+        if deadline is not None and clock.monotonic() >= deadline:
+            raise TimeoutError("experiment wall-time budget exhausted")
         today = by_day[day]
         if start <= day <= end and pending is not None:
             eligible = {s: today[s] for s in pending if s in today and today[s].volume > 0}
@@ -153,6 +169,8 @@ def evaluate(
         pending = [s for _, s in sorted(ranked, key=lambda item: (-item[0], item[1]))[:top_n]]
     if len(equity) < 2:
         raise ValueError("evaluation window needs at least two market dates")
+    if deadline is not None and clock.monotonic() >= deadline:
+        raise TimeoutError("experiment wall-time budget exhausted")
     returns = [equity[0] / initial_cash - 1]
     returns.extend(equity[i] / equity[i - 1] - 1 for i in range(1, len(equity)))
     mean = sum(returns) / len(returns)

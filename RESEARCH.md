@@ -54,8 +54,9 @@ papers were inspected. Upstream code was not copied into this project.
   delisting cash flows. Verify volume units and adjustment methodology.
 - Limit-up/down, suspended issues, liquidity, tick sizes, odd lots, fees with
   actual broker minima, and settlement cash. Current fills are idealized.
-- Purged walk-forward folds with embargo based on target horizon, a frozen
-  benchmark, turnover and exposure limits, bootstrap uncertainty, and a
+- Purged training labels if supervised targets are added; the current
+  expanding folds already leave a session embargo. Add a frozen benchmark,
+  turnover and exposure limits, bootstrap uncertainty, and a
   second untouched market regime. Never tune on the final holdout.
 - Independent reproduction using permitted TWSE/TPEX data. The five papers'
   reported returns do not transfer to Taiwan equities.

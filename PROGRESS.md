@@ -23,3 +23,11 @@ were not used for performance analysis.
 
 The evaluator now inserts late-arriving bars into history only once their
 recorded availability time has passed, preserving market-date order.
+
+Added expanding walk-forward folds with a configurable session embargo. The
+default candidate selection now uses the median validation return across
+three disjoint folds. No real market backtest was run.
+Added input, row, trial and experiment wall-time limits; evaluation checks the
+deadline during processing. The local synthetic and schema test suite now has
+15 passing tests. No real market backtest was run.
+The evaluator also rejects negative or non-finite transaction costs.
