@@ -17,6 +17,8 @@
   sibling research runs with a persistent local audit marker.
 - [x] Review official Fubon Neo daily-candle, corporate-action, rate-limit and
   data-use documents; add an offline private-export inspector.
+- [x] Add a read-only Fubon historical-candle adapter for an already
+  authenticated stock client; test request limits and private manifests.
 
 ## Next
 

@@ -2,8 +2,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from datetime import date, datetime, timezone
 
-from taiwanquant.fubon import inspect_candles
+from taiwanquant.fubon import fetch_daily_candles, inspect_candles
 
 
 class FubonInspectorTests(unittest.TestCase):
@@ -41,6 +42,45 @@ class FubonInspectorTests(unittest.TestCase):
                                               "volume": 1.5}])
             with self.assertRaisesRegex(ValueError, "share volume"):
                 inspect_candles(path, "2330")
+
+    def test_read_only_fetch_saves_private_provenance(self):
+        class FakeHistory:
+            def candles(self, **kwargs):
+                self.request = kwargs
+                return {
+                    "symbol": "2330", "exchange": "TWSE", "timeframe": "D",
+                    "data": [{"date": "2024-01-02", "open": 10, "close": 11,
+                              "volume": 1000}],
+                }
+
+        class FakeClient:
+            historical = FakeHistory()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            client = FakeClient()
+            raw, manifest = fetch_daily_candles(
+                client, "2330", date(2024, 1, 1), date(2024, 1, 31),
+                Path(tmp), clock=lambda: datetime(2024, 2, 1, tzinfo=timezone.utc),
+            )
+            self.assertEqual(client.historical.request["adjusted"], "false")
+            self.assertEqual(client.historical.request["timeframe"], "D")
+            self.assertTrue(raw.exists())
+            metadata = json.loads(manifest.read_text())
+            self.assertFalse(metadata["redistribution_reviewed"])
+            self.assertFalse(metadata["publication_timestamps_present"])
+
+    def test_read_only_fetch_rejects_long_range_before_call(self):
+        class FakeHistory:
+            def candles(self, **_):
+                raise AssertionError("broker must not be called")
+
+        class FakeClient:
+            historical = FakeHistory()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "fewer than 365"):
+                fetch_daily_candles(FakeClient(), "2330", date(2024, 1, 1),
+                                    date(2025, 1, 1), Path(tmp))
 
 
 if __name__ == "__main__":

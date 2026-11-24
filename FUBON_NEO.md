@@ -45,3 +45,10 @@ validates an exported daily-candle response locally and prints only schema
 metadata. It never logs credentials or quote rows. Network retrieval and
 normalization remain gated on the user's existing login setup and confirmed
 account-specific fees.
+
+The private adapter also exposes `fetch_daily_candles(authenticated_stock_client,
+symbol, start, end, output_dir)`. It accepts an already authenticated SDK
+stock client, requests unadjusted daily candles for fewer than 365 days,
+validates the response, and saves quote bytes plus a provenance manifest in
+`data/fubon/raw/`. It contains no login, order, or account-query code. It is
+not invoked by the normal CLI or daily research automation.

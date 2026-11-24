@@ -47,3 +47,7 @@ the original publication timestamp or a survivor-free universe. Added an
 offline inspector for private daily-candle exports. No login, broker request,
 or order was made.
 The offline suite has 20 passing tests after this adapter was added.
+Added a read-only historical-candle fetch function requiring an already
+authenticated Fubon stock client. It requests unadjusted daily bars for less
+than 365 days and stores data only in Git-ignored local paths. No broker
+request has been made. The suite now has 22 passing tests.
