@@ -13,6 +13,7 @@ from datetime import date
 from pathlib import Path
 
 from .core import Costs, evaluate, load_bars
+from .snapshot import capture
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -167,6 +168,9 @@ def main() -> None:
     holdout = sub.add_parser("test")
     holdout.add_argument("csv")
     holdout.add_argument("--run", required=True)
+    snapshot = sub.add_parser("snapshot", help="capture an observed public daily quote response")
+    snapshot.add_argument("market", choices=("twse", "tpex"))
+    snapshot.add_argument("--out", default="data/raw")
     args = parser.parse_args()
     try:
         if args.command == "validate":
@@ -176,8 +180,11 @@ def main() -> None:
             if not 1 <= args.max_trials <= 15 or not 1 <= args.max_seconds <= 3600:
                 raise ValueError("max-trials must be 1..15 and max-seconds 1..3600")
             research(args)
-        else:
+        elif args.command == "test":
             test_holdout(args)
+        else:
+            raw, manifest = capture(args.market, Path(args.out))
+            print(json.dumps({"raw": str(raw.resolve()), "manifest": str(manifest.resolve())}))
     except (ValueError, OSError, KeyError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         raise SystemExit(2) from exc

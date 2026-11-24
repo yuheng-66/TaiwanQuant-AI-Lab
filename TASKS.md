@@ -8,12 +8,15 @@
 - [x] Build the local CPU research loop, fixed evaluator, experiment log,
   candidate hashes, and one-shot holdout command.
 - [x] Add targeted tests for leakage, next-open execution, costs, and records.
+- [x] Verify official free daily TWSE/TPEx dataset licenses and add a
+  provenance-preserving snapshot command with schema tests.
+- [x] Preserve market-date order when delayed rows become available to a signal.
 
 ## Next
 
-- [ ] Obtain and license-check a survivorship-aware TWSE/TPEX dataset. Record
-  source URL, retrieval time, publication lag, adjustment and redistribution
-  rights. Keep raw rows outside Git.
+- [ ] Obtain a survivorship-aware historical TWSE/TPEX dataset and verify its
+  specific license, publication lag, adjustment method and delisting coverage.
+  Keep raw rows outside Git. The licensed daily feeds alone are insufficient.
 - [ ] Add split/dividend/delisting adjustments and orderability checks for
   limit-up/down and suspensions.
 - [ ] Add purged walk-forward folds, predeclared metric, benchmark and

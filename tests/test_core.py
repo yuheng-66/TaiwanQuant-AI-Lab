@@ -37,6 +37,17 @@ class EvaluatorTests(unittest.TestCase):
         result = evaluate(rows, date(2024, 1, 1), date(2024, 1, 3), 2, 1)
         self.assertEqual(result["trades"], 0)
 
+    def test_late_bar_enters_history_only_after_retrieval(self):
+        rows = [bar("2024-01-01", 10),
+                Bar(date(2024, 1, 2), "2330", 20, 20, 2_000_000,
+                    datetime(2024, 1, 3, 17, tzinfo=TPE)),
+                bar("2024-01-03", 30), bar("2024-01-04", 40)]
+        free = Costs(0, 0, 0, 1, 1000)
+        early = evaluate(rows, date(2024, 1, 1), date(2024, 1, 3), 3, 1, free)
+        later = evaluate(rows, date(2024, 1, 1), date(2024, 1, 4), 3, 1, free)
+        self.assertEqual(early["trades"], 0)
+        self.assertGreater(later["trades"], 0)
+
     def test_first_session_return_is_included(self):
         rows = [bar("2024-01-01", 10), bar("2024-01-02", 20),
                 bar("2024-01-03", 30, opening=20), bar("2024-01-04", 30)]

@@ -12,6 +12,8 @@ Python 3.11+ is sufficient; the MVP has no runtime dependencies.
 python3 -m taiwanquant validate path/to/bars.csv
 python3 -m taiwanquant research path/to/bars.csv --train-end 2021-12-31 --valid-end 2023-12-31 --test-end 2024-12-31 --out runs/first
 python3 -m taiwanquant test path/to/bars.csv --run runs/first
+python3 -m taiwanquant snapshot twse --out data/raw
+python3 -m taiwanquant snapshot tpex --out data/raw
 python3 -m unittest discover -s tests -v
 ```
 
@@ -22,6 +24,10 @@ represents when the complete row was actually available, not when it was dated.
 The research command writes generated strategy code, a SHA-256 data fingerprint,
 `experiments.jsonl`, and `summary.json`. The test command opens the holdout once
 for the selected candidate and writes `holdout.json`.
+The snapshot command records an official daily response, retrieval timestamp,
+source license page and SHA-256 hash under the Git-ignored `data/raw/` folder.
+It is an observation, not a point-in-time historical dataset: the API does not
+provide the original publication time of older records.
 
 This is a research MVP, not a production trading system. It models next-session
 open fills, board lots, fees, tax, slippage, and a volume cap; it does not model

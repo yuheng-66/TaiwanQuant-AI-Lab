@@ -8,6 +8,11 @@ Licensed, point-in-time CSV
   -> one-shot holdout audit -> progress and daily report
 ```
 
+An additional capture path stores official TWSE and TPEx daily JSON responses
+with observed retrieval timestamps and SHA-256 manifests under `data/raw/`.
+Those captures are evidence for a future point-in-time archive; they are not
+silently converted into historical publication times. See `DATA_SOURCES.md`.
+
 `taiwanquant/core.py` is the evaluation boundary. The proposer writes code
 artifacts containing literal strategy parameters; the runner parses those
 parameters without executing arbitrary code. Later LLM adapters may propose
@@ -22,6 +27,8 @@ are simulated at the next available market open. A position is rounded to
 1,000 shares and an order is capped at 1% of that day's reported share volume.
 Cash, shares, fees, sell tax and slippage are tracked. The simulation never
 sends orders to a broker.
+Late-arriving rows enter the feature history only after their recorded
+availability time; history remains ordered by market date.
 
 `research` consumes a chronological train window and a validation window. It
 never computes test-period metrics. `test` checks data and candidate hashes,

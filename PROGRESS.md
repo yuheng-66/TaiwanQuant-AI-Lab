@@ -6,3 +6,20 @@ Autoresearch, Qlib, TradingAgents and FinRobot at the pinned commits in
 point-in-time Taiwan equities dataset. There are no market-performance
 results yet. Every future run should append its path, data fingerprint,
 window dates, selected trial, all failed trials and holdout status here.
+
+2026-11-25: Verified the government open-data catalogue entries for TWSE
+dataset 11549 and TPEx dataset 11370; both state free use under the Open
+Government Data License v1 with attribution. Added an observed-time snapshot
+command and manifest. No historical availability was inferred and no market
+performance experiment was run. See `DATA_SOURCES.md`.
+
+The first local captures were retrieved at 2026-11-25 00:40 Taiwan time:
+TWSE had 1,394 rows dated 2026-11-23 (SHA-256
+`728d702c0cce712701adae52105fd4d85b0e67f960e3faabcb3a1a7124f9272b`);
+TPEx had 1,020 rows dated 2026-11-24 (SHA-256
+`da063f8ce45670ca1cd25f2891ab73feee4b9c8b20bb43f4b32d3ce53deb3279`).
+Raw files and manifests are in the Git-ignored `data/raw/` directory. They
+were not used for performance analysis.
+
+The evaluator now inserts late-arriving bars into history only once their
+recorded availability time has passed, preserving market-date order.

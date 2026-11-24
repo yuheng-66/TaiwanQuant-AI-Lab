@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import math
+from bisect import insort
 from dataclasses import dataclass
 from datetime import date, datetime, time, timezone, timedelta
 from pathlib import Path
@@ -82,7 +83,9 @@ def evaluate(
     for b in bars:
         by_day.setdefault(b.day, {})[b.symbol] = b
     days = sorted(by_day)
-    history: dict[str, list[float]] = {}
+    history: dict[str, list[tuple[date, float]]] = {}
+    releases = sorted(bars, key=lambda b: (b.available_at, b.day, b.symbol))
+    release_index = 0
     cash = initial_cash
     shares: dict[str, int] = {}
     last_close: dict[str, float] = {}
@@ -132,18 +135,20 @@ def evaluate(
             last_close[symbol] = b.close
         if start <= day <= end:
             equity.append(cash + sum(q * last_close[s] for s, q in shares.items()))
-        # Today's completed bar can inform tomorrow only if it was available by 18:00.
+        # Add late-arriving older bars only once observed; retain market-date order.
         asof = datetime.combine(day, time(18), TPE)
-        for symbol, b in today.items():
-            if b.available_at <= asof:
-                history.setdefault(symbol, []).append(b.close)
+        while release_index < len(releases) and releases[release_index].available_at <= asof:
+            b = releases[release_index]
+            if b.day <= day:
+                insort(history.setdefault(b.symbol, []), (b.day, b.close))
+            release_index += 1
         ranked = []
         for symbol, values in history.items():
             if symbol not in today or len(values) < lookback:
                 continue
             if today[symbol].available_at > asof:
                 continue
-            score = values[-1] / values[-lookback] - 1
+            score = values[-1][1] / values[-lookback][1] - 1
             ranked.append((score, symbol))
         pending = [s for _, s in sorted(ranked, key=lambda item: (-item[0], item[1]))[:top_n]]
     if len(equity) < 2:
