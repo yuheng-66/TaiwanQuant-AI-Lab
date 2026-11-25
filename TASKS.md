@@ -26,6 +26,8 @@
   broker exports or responses.
 - [x] Size simulated next-open orders using previously published volume
   rather than the execution day's completed-session volume.
+- [x] Count first-session losses in maximum drawdown by including initial
+  cash as the pre-trading equity peak.
 
 ## Next
 

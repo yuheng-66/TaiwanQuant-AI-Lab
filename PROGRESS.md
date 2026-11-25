@@ -79,3 +79,10 @@ order when the prior known volume permits no board lot. The offline suite has
 25 passing tests. No market-data experiment or performance claim was made.
 The execution-day zero-volume no-fill rule remains a retrospective proxy
 until opening auction and suspension data are available.
+
+Corrected maximum drawdown to start from initial cash rather than the first
+observed session's closing equity. Before this change, a loss from costs or
+price movement in the first evaluated session could be omitted. A synthetic
+case with an opening purchase and commission now checks for negative
+drawdown. The offline suite has 26 passing tests. No broker request,
+market-data experiment or performance claim was made.

@@ -50,6 +50,8 @@ intentionally simple and should be replaced by a predeclared, risk-adjusted
 objective with uncertainty estimates before publication. The current backtest ignores
 corporate actions, dividends, limit queues and settlement constraints. It
 must not be interpreted as executable strategy P&L.
+Maximum drawdown includes the initial cash balance as the pre-trading equity
+peak, so a loss incurred in the first evaluated session is counted.
 
 The current input guard rejects files over 100 MB or 250,000 rows. Candidate
 search is limited to 15 trials, with a monotonic deadline checked during each

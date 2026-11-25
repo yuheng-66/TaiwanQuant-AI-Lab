@@ -181,7 +181,7 @@ def evaluate(
     mean = sum(returns) / len(returns)
     variance = sum((r - mean) ** 2 for r in returns) / len(returns)
     sharpe = mean / math.sqrt(variance) * math.sqrt(252) if variance > 0 else None
-    peak = equity[0]
+    peak = initial_cash
     max_drawdown = 0.0
     for value in equity:
         peak = max(peak, value)

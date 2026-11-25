@@ -77,6 +77,14 @@ class EvaluatorTests(unittest.TestCase):
         result = evaluate(rows, date(2024, 1, 3), date(2024, 1, 4), 2, 1, free)
         self.assertGreater(result["total_return"], 0)
 
+    def test_first_session_loss_counts_toward_max_drawdown(self):
+        rows = [bar("2024-01-01", 10), bar("2024-01-02", 20),
+                bar("2024-01-03", 20), bar("2024-01-04", 20)]
+        result = evaluate(rows, date(2024, 1, 3), date(2024, 1, 4), 2, 1,
+                          Costs(0.01, 0, 0, 1, 1000))
+        self.assertGreater(result["trades"], 0)
+        self.assertLess(result["max_drawdown"], 0)
+
     def test_validator_rejects_duplicate_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "bars.csv"
