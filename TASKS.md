@@ -24,6 +24,8 @@
   format without reading credentials or making broker requests.
 - [x] Validate Fubon daily OHLC range consistency before accepting private
   broker exports or responses.
+- [x] Size simulated next-open orders using previously published volume
+  rather than the execution day's completed-session volume.
 
 ## Next
 

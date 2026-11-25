@@ -70,3 +70,12 @@ synthetic test covers an inconsistent high. The offline suite has 24 passing
 tests. No broker request or market-performance experiment was run. A new live
 request remains blocked because the user's Mac connection does not grant
 terminal execution; do not bypass that access boundary.
+
+The backtest previously sized next-open orders with the execution day's
+completed-session volume, a look-ahead input. It now caps buy and sell size
+using the latest daily volume published by the preceding decision time.
+A synthetic test checks that a high-volume execution day cannot enlarge an
+order when the prior known volume permits no board lot. The offline suite has
+25 passing tests. No market-data experiment or performance claim was made.
+The execution-day zero-volume no-fill rule remains a retrospective proxy
+until opening auction and suspension data are available.

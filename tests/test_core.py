@@ -29,6 +29,16 @@ class EvaluatorTests(unittest.TestCase):
         self.assertLess(with_cost["total_return"], 0)
         self.assertGreater(with_cost["total_cost_twd"], 0)
 
+    def test_open_order_size_uses_previously_published_volume(self):
+        rows = [bar("2024-01-01", 10), bar("2024-01-02", 20),
+                Bar(date(2024, 1, 3), "2330", 20, 20, 20_000_000,
+                    datetime(2024, 1, 3, 17, tzinfo=TPE))]
+        rows[1] = Bar(rows[1].day, rows[1].symbol, rows[1].open,
+                      rows[1].close, 1_000, rows[1].available_at)
+        result = evaluate(rows, date(2024, 1, 1), date(2024, 1, 3), 2, 1,
+                          Costs(0, 0, 0, 0.01, 1000))
+        self.assertEqual(result["trades"], 0)
+
     def test_expired_budget_stops_evaluation(self):
         rows = [bar("2024-01-01", 10), bar("2024-01-02", 20)]
         with self.assertRaisesRegex(TimeoutError, "budget exhausted"):

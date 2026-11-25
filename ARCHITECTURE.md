@@ -24,7 +24,11 @@ from Git.
 The data contract requires a timezone-aware publication timestamp for each
 daily bar. A signal at 18:00 Asia/Taipei sees only published rows and orders
 are simulated at the next available market open. A position is rounded to
-1,000 shares and an order is capped at 1% of that day's reported share volume.
+1,000 shares and an order is capped at 1% of the latest previously published
+daily share volume. The execution day's full-session volume is not available
+at the open and is not used to size orders. A zero-volume execution-day row is
+still used as a retrospective no-fill proxy; a proper opening auction and
+suspension feed remains necessary.
 Cash, shares, fees, sell tax and slippage are tracked. The simulation never
 sends orders to a broker.
 Late-arriving rows enter the feature history only after their recorded

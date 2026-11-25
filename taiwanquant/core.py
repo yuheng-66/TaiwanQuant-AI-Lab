@@ -98,6 +98,7 @@ def evaluate(
         by_day.setdefault(b.day, {})[b.symbol] = b
     days = sorted(by_day)
     history: dict[str, list[tuple[date, float]]] = {}
+    published_volume: dict[str, tuple[date, int]] = {}
     releases = sorted(bars, key=lambda b: (b.available_at, b.day, b.symbol))
     release_index = 0
     cash = initial_cash
@@ -118,7 +119,8 @@ def evaluate(
                 b = today.get(symbol)
                 if symbol in pending or b is None or b.volume <= 0:
                     continue
-                cap = int(b.volume * costs.max_volume_fraction // costs.lot_size) * costs.lot_size
+                known_volume = published_volume.get(symbol, (day, 0))[1]
+                cap = int(known_volume * costs.max_volume_fraction // costs.lot_size) * costs.lot_size
                 qty = min(shares[symbol], cap)
                 if qty:
                     gross = qty * b.open * (1 - costs.slippage)
@@ -138,7 +140,8 @@ def evaluate(
                     current = shares.get(symbol, 0)
                     desired = max(0, int(target_value / (b.open * (1 + costs.slippage))
                                          // costs.lot_size) * costs.lot_size)
-                    cap = int(b.volume * costs.max_volume_fraction // costs.lot_size) * costs.lot_size
+                    known_volume = published_volume.get(symbol, (day, 0))[1]
+                    cap = int(known_volume * costs.max_volume_fraction // costs.lot_size) * costs.lot_size
                     qty = min(max(0, desired - current), cap)
                     per_share = b.open * (1 + costs.slippage) * (1 + costs.commission)
                     qty = min(qty, int(cash / per_share // costs.lot_size) * costs.lot_size)
@@ -157,6 +160,8 @@ def evaluate(
             b = releases[release_index]
             if b.day <= day:
                 insort(history.setdefault(b.symbol, []), (b.day, b.close))
+                if b.day >= published_volume.get(b.symbol, (date.min, 0))[0]:
+                    published_volume[b.symbol] = (b.day, b.volume)
             release_index += 1
         ranked = []
         for symbol, values in history.items():
