@@ -85,6 +85,26 @@ class EvaluatorTests(unittest.TestCase):
         self.assertGreater(result["trades"], 0)
         self.assertLess(result["max_drawdown"], 0)
 
+    def test_daily_bar_requires_availability_at_or_after_regular_close(self):
+        header = "date,symbol,open,close,volume,available_at\n"
+        row = "2024-01-02,2330,10,10,1000,"
+        cases = (
+            ("2024-01-02T05:29:59+00:00", False),
+            ("2024-01-02T05:30:00+00:00", True),
+            ("2024-01-03T01:00:00+08:00", True),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bars.csv"
+            for timestamp, accepted in cases:
+                with self.subTest(timestamp=timestamp):
+                    path.write_text(header + row + timestamp + "\n")
+                    if accepted:
+                        bars, _ = load_bars(path)
+                        self.assertEqual(len(bars), 1)
+                    else:
+                        with self.assertRaisesRegex(ValueError, "before the regular session close"):
+                            load_bars(path)
+
     def test_validator_rejects_duplicate_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "bars.csv"

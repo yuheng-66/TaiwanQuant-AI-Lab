@@ -12,6 +12,7 @@ from datetime import date, datetime, time, timezone, timedelta
 from pathlib import Path
 
 TPE = timezone(timedelta(hours=8))
+REGULAR_SESSION_CLOSE = time(13, 30)
 MAX_INPUT_BYTES = 100_000_000
 MAX_BARS = 250_000
 
@@ -62,8 +63,9 @@ def load_bars(path: str | Path) -> tuple[list[Bar], str]:
                     raise ValueError("prices must be positive; volume nonnegative; timestamp offset required")
                 if (day, symbol) in seen:
                     raise ValueError("duplicate date/symbol")
-                if available.astimezone(TPE).date() < day:
-                    raise ValueError("availability precedes market date")
+                session_close = datetime.combine(day, REGULAR_SESSION_CLOSE, TPE)
+                if available < session_close:
+                    raise ValueError("availability is before the regular session close")
                 seen.add((day, symbol))
                 bars.append(Bar(day, symbol, opening, closing, volume, available))
             except (KeyError, TypeError, ValueError) as exc:

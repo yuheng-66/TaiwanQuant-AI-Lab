@@ -86,3 +86,17 @@ price movement in the first evaluated session could be omitted. A synthetic
 case with an opening purchase and commission now checks for negative
 drawdown. The offline suite has 26 passing tests. No broker request,
 market-data experiment or performance claim was made.
+
+2026-11-26: Tested the daily CSV publication-time floor using Python 3.11.2.
+The synthetic fixture in `test_daily_bar_requires_availability_at_or_after_regular_close`
+uses a 2024-01-02 bar for 2330 with open and close of 10 and volume of
+1,000 shares. The test varies availability across 05:29:59 UTC and
+05:30:00 UTC on January 2, and 01:00 Taiwan time on January 3.
+The targeted test initially failed on the pre-close case against base
+commit `5eddf52149a07a7e409fb380acb148e88526fda3` with the new fixture.
+After the validator change, all 27 tests passed via
+`python3 -m unittest discover -s tests`. Git blob IDs for the tested
+validator and fixture files are `f82457ce9ce016e1fce91cb612a2e1a99807eb6b`
+and `b5d5f47fd153e8cbce5c8c7fe18ef795bce8311c`, respectively.
+No historical market dataset or broker feed was used. Verifying the
+actual publication lag, licensing and delisting coverage remains open.

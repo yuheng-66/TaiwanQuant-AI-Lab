@@ -29,6 +29,11 @@
 - [x] Count first-session losses in maximum drawdown by including initial
   cash as the pre-trading equity peak.
 
+## Completed 2026-11-26
+
+- [x] Reject daily CSV bars with availability before the regular Taiwan session
+  close as a lower-bound check for source provenance.
+
 ## Next
 
 - [ ] Obtain a survivorship-aware historical TWSE/TPEX dataset and verify its
@@ -47,6 +52,6 @@
 
 ## Work session state
 
-Date: 2026-11-25. Phase: MVP complete; genuine market-data evaluation pending.
+Date: 2026-11-26. Phase: MVP complete; genuine market-data evaluation pending.
 No real market backtest has been run and no return claim has been made.
 Resume by checking `RESEARCH.md`, this checklist, and the latest run directory.

@@ -22,7 +22,9 @@ train/validation metrics or a failure. The raw data file is hashed and excluded
 from Git.
 
 The data contract requires a timezone-aware publication timestamp for each
-daily bar. A signal at 18:00 Asia/Taipei sees only published rows and orders
+daily bar. The CSV validator rejects availability before 13:30 Taiwan time
+on the bar date, the regular-session close. This lower bound does not
+verify the source's actual publication time. A signal at 18:00 Asia/Taipei sees only published rows and orders
 are simulated at the next available market open. A position is rounded to
 1,000 shares and an order is capped at 1% of the latest previously published
 daily share volume. The execution day's full-session volume is not available
